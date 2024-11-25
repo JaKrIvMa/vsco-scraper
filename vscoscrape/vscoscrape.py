@@ -18,7 +18,7 @@ class Scraper(object):
         self.username = username
         self.session = requests.Session()
         self.session.get(
-            "http://vsco.co/content/Static/userinfo?callback=jsonp_%s_0"
+            "https://vsco.co/content/Static/userinfo?callback=jsonp_%s_0"
             % (str(round(time.time() * 1000))),
             headers=constants.visituserinfo,
         )
@@ -53,7 +53,7 @@ class Scraper(object):
 
         if cache is None or self.username not in cache:
             res = self.session.get(
-                "http://vsco.co/api/2.0/sites?subdomain=%s"
+                "https://vsco.co/api/2.0/sites?subdomain=%s"
                 % (self.username),
                 headers=constants.visituserinfo,
             )
@@ -72,16 +72,16 @@ class Scraper(object):
         :params: none
         :return: returns the main media url by default
         """
-        self.mediaurl = "http://vsco.co/api/2.0/medias?site_id=%s" % (
+        self.mediaurl = "https://vsco.co/api/2.0/medias?site_id=%s" % (
             self.siteid,
         )
-        self.journalurl = "http://vsco.co/api/2.0/articles?site_id=%s" % (
+        self.journalurl = "https://vsco.co/api/2.0/articles?site_id=%s" % (
             self.siteid,
         )
-        self.collectionurl = "http://vsco.co/api/2.0/collections/%s/medias?" % (
+        self.collectionurl = "https://vsco.co/api/2.0/collections/%s/medias?" % (
             self.sitecollectionid,
         )
-        self.profileurl = "http://vsco.co/api/2.0/sites/%s" % (self.siteid)
+        self.profileurl = "https://vsco.co/api/2.0/sites/%s" % (self.siteid)
         
         return self.mediaurl
 
@@ -550,33 +550,21 @@ class Scraper(object):
         return True
 
     def download_img_normal(self, lists):
-        """
-        This function makes sense at least
-
-        The if '%s.whatever' sections are to skip downloading the file again if it's already been downloaded
-
-        At the time I wrote this, I only remember seeing that images and videos were the only things allowed
-
-        So I didn't write an if statement checking for text files, so this would just skip it I believe if it ever came up
-        and return True
-
-        :params: lists - My naming sense was beat. lists is just a media item.
-        :return: a boolean on whether the media item was downloaded successfully
-        """
+       
         if lists[2] is False:
-            if "%s.jpg" % lists[1] in os.listdir():
+            if f"{lists[1]}.jpg" in os.listdir():
                 return True
-            with open("%s.jpg" % str(lists[1]), "wb") as f:
-                f.write(requests.get(lists[0], stream=True).content)
+            with open(f"{str(lists[1])}.jpg", "wb") as file:
+                file.write(requests.get(lists[0], headers=constants.images, stream=True).content)
         else:
-            if "%s.mp4" % lists[1] in os.listdir():
+            if f"{lists[1]}.mp4" in os.listdir():
                 return True
-            with open("%s.mp4" % str(lists[1]), "wb") as f:
-                for chunk in requests.get(lists[0], stream=True).iter_content(
+            with open(f"{str(lists[1])}.mp4", "wb") as file:
+                for chunk in requests.get(lists[0],headers=constants.images, stream=True).iter_content(
                     chunk_size=1024
                 ):
                     if chunk:
-                        f.write(chunk)
+                        file.write(chunk)
         return True
 
     def run_all(self):
